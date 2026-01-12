@@ -13,7 +13,7 @@ function renderReadingTime(article) {
   const badge = document.createElement("p");
   // Use the same styling as the publish information in an article's header
   badge.classList.add("color-secondary-text", "type--caption");
-  badge.textContent = `⏱️ ${readingTime} min read`;
+  badge.textContent = `There are ${wordCount} words, ⏱️ ${readingTime} min read`;
 
   // Support for API reference docs
   const heading = article.querySelector("h1");
