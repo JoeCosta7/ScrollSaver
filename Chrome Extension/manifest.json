@@ -1,0 +1,6 @@
+{
+  "manifest_version": 3,
+  "name": "Chrome Extension",
+  "description": "Does Something",
+  "version": "1.0"
+}
