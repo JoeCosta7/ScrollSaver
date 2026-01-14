@@ -2,6 +2,7 @@
   "manifest_version": 3,
   "name": "Chrome Extension",
   "description": "Does Something",
+  "permissions": "[storage]",
   "icons": {
     "16": "images/icon-16.png",
     "32": "images/icon-32.png",
