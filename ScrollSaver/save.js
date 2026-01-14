@@ -1,14 +1,22 @@
 document.addEventListener('DOMContentLoaded', function() {
+    chrome.storage.local.get(['mySavedUrl'], function(result) {
+        if (result.mySavedUrl) {
+            document.getElementById("link").innerHTML = result.mySavedUrl;
+        } else {
+            document.getElementById("link").innerHTML = "No URL saved yet";
+        }
+    });
     const button = document.getElementById("savePage");
     button.addEventListener("click", async function () {
-    const url = await getCurrentTabUrl();
-    chrome.storage.local.set({'mySavedUrl': url}, function() {
-    console.log('URL saved!');
-     chrome.storage.local.get(['mySavedUrl'], function(result) {
-        document.getElementById("link").innerHTML = result.mySavedUrl;
-})
-})
-})
+        console.log("hello");
+        
+        const url = await getCurrentTabUrl();
+        
+        chrome.storage.local.set({'mySavedUrl': url}, function() {
+            console.log('URL saved!');
+            document.getElementById("link").innerHTML = url;
+        });
+    });
 });
 
 async function getCurrentTabUrl() {
