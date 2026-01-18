@@ -4,7 +4,7 @@ document.getElementById('loadPage').addEventListener('click', function() {
             const url = await getCurrentTabUrl();
 
             if(url!=result.mySavedUrl){
-              chrome.tabs.create({ url: result.mySavedUrl });
+              chrome.tabs.create({ url: result.mySavedUrl })
             }
             executeScroll(result.scrollPos[0],result.scrollPos[1]); 
             

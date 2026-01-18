@@ -12,5 +12,19 @@ chrome.storage.local.get(['mySavedUrl', 'scrollPos'], async function(result) {
         newElement.style.zIndex = "10000";
 
         document.body.appendChild(newElement);
+        if(result.scrollPos){
+            window.scrollTo(result.scrollPos[0], result.scrollPos[1]);
+        }
     }
+
+    window.navigation.addEventListener("navigate", () =>{
+        console.log('location changed!');
+        if (result.mySavedUrl != location){
+            document.getElementById("newAnchor").style.visibility = "hidden";
+        }
+        else{
+            document.getElementById("newAnchor").style.visibility = "visible";
+        }
+    });
 });
+
