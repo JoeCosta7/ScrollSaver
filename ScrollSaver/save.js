@@ -1,8 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.local.get(['mySavedUrls'], function(result) {
         if (result.mySavedUrls && result.mySavedUrls.length > 0) {
-            const urlList = result.mySavedUrls.map(url => `<li>${url}</li>`).join('');
-            document.getElementById("link").innerHTML = urlList;
+            displayUrls(result.mySavedUrls)
         } else {
             document.getElementById("link").innerHTML = "No URL saved yet";
         }
@@ -25,13 +24,36 @@ document.addEventListener('DOMContentLoaded', function() {
             existingUrls.push(url);
             chrome.storage.local.set({'mySavedUrls': existingUrls}, function() {
                 console.log('URL saved!');
-
-                const urlList = existingUrls.map(url => `<li>${url}</li>`).join('');
-                document.getElementById("link").innerHTML = urlList;
+                displayUrls(existingUrls);
             });
         });
     });
 });
+
+function displayUrls(urls) {
+    const linkElement = document.getElementById("link");
+    linkElement.innerHTML = "";
+    //TODO: put css in own file
+    urls.forEach((url, index) => {
+        const itemDiv = document.createElement("div");
+        itemDiv.style.marginBottom = "10px";
+        itemDiv.style.display = 'flex';
+        itemDiv.style.alignItems = 'center';
+        itemDiv.style.gap = '10px';
+
+        const urlText = document.createElement("p");
+        urlText.textContent = url;
+
+        const button = document.createElement("button");
+        button.textContent = "Go";
+        button.addEventListener("click", async function () {
+            handleButtonClick(url, index)
+        });
+        itemDiv.appendChild(urlText);
+        itemDiv.appendChild(button);
+        linkElement.appendChild(itemDiv);
+    });
+}
 
 async function getCurrentTabUrl() {
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
@@ -42,6 +64,7 @@ async function getCurrentTabUrl() {
 async function requestScrollPosition() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     const response = await chrome.tabs.sendMessage(tab.id, {message: "scrollXY"});
+    
     chrome.storage.local.set({'scrollPos': response.scrollPos}, function() {
             console.log('scroll saved');
         });
