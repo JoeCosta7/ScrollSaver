@@ -1,18 +1,18 @@
-document.getElementById('loadPage').addEventListener('click', function() {
-  chrome.storage.local.get(['mySavedUrl', 'scrollPos'], async function(result) {
-        if (result.mySavedUrl) {
+function handleButtonClick(savedUrl, index) {
+  chrome.storage.local.get(['scrollPositions'], async function(result) {
             const url = await getCurrentTabUrl();
 
-            if(url!=result.mySavedUrl){
-              chrome.tabs.create({ url: result.mySavedUrl })
+            if(url!=savedUrl){
+              chrome.tabs.create({ url: savedUrl })
             }
-            executeScroll(result.scrollPos[0],result.scrollPos[1]); 
+            if (result.scrollPositions && result.scrollPositions[index]) {
+            executeScroll(result.scrollPos[index][0],result.scrollPos[index][1]); 
             
         } else {
             console.log("no url");
         }
-    });
-});
+      });
+};
 
 function loadScrollPos() {
     chrome.runtime.onMessage.addListener(message=>{

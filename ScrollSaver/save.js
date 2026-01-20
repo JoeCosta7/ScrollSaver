@@ -49,8 +49,13 @@ function displayUrls(urls) {
         button.addEventListener("click", async function () {
             handleButtonClick(url, index)
         });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Delete";
+
         itemDiv.appendChild(urlText);
         itemDiv.appendChild(button);
+        itemDiv.appendChild(deleteButton);
         linkElement.appendChild(itemDiv);
     });
 }
@@ -65,7 +70,12 @@ async function requestScrollPosition() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     const response = await chrome.tabs.sendMessage(tab.id, {message: "scrollXY"});
     
-    chrome.storage.local.set({'scrollPos': response.scrollPos}, function() {
+    chrome.storage.local.get(['scrollPositions'], function(result) {
+        const scrollPositions = result.scrollPositions || [];
+        scrollPositions.push(response.scrollPos);
+    });
+
+    chrome.storage.local.set({'scrollPositions': scrollPositions}, function() {
             console.log('scroll saved');
         });
 }
