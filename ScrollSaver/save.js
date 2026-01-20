@@ -1,14 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
-    chrome.storage.local.get(['mySavedUrl'], function(result) {
-        if (result.mySavedUrl) {
-            document.getElementById("link").innerHTML = result.mySavedUrl;
+    chrome.storage.local.get(['mySavedUrls'], function(result) {
+        if (result.mySavedUrls && result.mySavedUrls.length > 0) {
+            const urlList = result.mySavedUrls.map(url => `<li>${url}</li>`).join('');
+            document.getElementById("link").innerHTML = urlList;
         } else {
             document.getElementById("link").innerHTML = "No URL saved yet";
         }
     });
     const button = document.getElementById("savePage");
     button.addEventListener("click", async function () {
-        console.log("hello");
         
         const url = await getCurrentTabUrl();
 
@@ -20,9 +20,15 @@ document.addEventListener('DOMContentLoaded', function() {
               .then(requestScrollPosition());
             })
         
-        chrome.storage.local.set({'mySavedUrl': url}, function() {
-            console.log('URL saved!');
-            document.getElementById("link").innerHTML = url;
+        chrome.storage.local.get({'mySavedUrls': []}, function(result) {
+            const existingUrls = result.mySavedUrls || [];
+            existingUrls.push(url);
+            chrome.storage.local.set({'mySavedUrls': existingUrls}, function() {
+                console.log('URL saved!');
+
+                const urlList = existingUrls.map(url => `<li>${url}</li>`).join('');
+                document.getElementById("link").innerHTML = urlList;
+            });
         });
     });
 });
