@@ -1,6 +1,7 @@
 
-chrome.storage.local.get(['mySavedUrl', 'scrollPos'], async function(result) {
-    if (result.mySavedUrl == location) {
+chrome.storage.local.get(['mySavedUrls', 'scrollPos'], async function(result) {
+    const existingUrls = result.mySavedUrls || [];
+    if (existingUrls.includes(location.href)) {
         const newElement = document.createElement("div");
         newElement.setAttribute("id", "newAnchor");
         newElement.textContent = "Anchor is here...";
@@ -19,7 +20,7 @@ chrome.storage.local.get(['mySavedUrl', 'scrollPos'], async function(result) {
 
     window.navigation.addEventListener("navigate", () =>{
         console.log('location changed!');
-        if (result.mySavedUrl != location){
+        if (existingUrls.includes(location)){
             document.getElementById("newAnchor").style.visibility = "hidden";
         }
         else{
