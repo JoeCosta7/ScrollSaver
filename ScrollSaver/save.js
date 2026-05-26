@@ -12,11 +12,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const url = await getCurrentTabUrl();
 
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-              chrome.scripting.executeScript({
+              chrome.scripting.executeScript( {
                 target: { tabId: tabs[0].id },
-                func: sendScrollPosition
+                func: sendScrollPosition,
+                world: "ISOLATED"
               })
-              .then(requestScrollPosition());
+              .then(requestScrollPosition);
             })
         
         chrome.storage.local.get({'mySavedUrls': []}, function(result) {
@@ -52,6 +53,9 @@ function displayUrls(urls) {
 
         const deleteButton = document.createElement("button");
         deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", async function () {
+            handleDeleteClick(url, index);
+        });
 
         itemDiv.appendChild(urlText);
         itemDiv.appendChild(button);
@@ -73,12 +77,13 @@ async function requestScrollPosition() {
     chrome.storage.local.get(['scrollPositions'], function(result) {
         const scrollPositions = result.scrollPositions || [];
         scrollPositions.push(response.scrollPos);
-    });
-
-    chrome.storage.local.set({'scrollPositions': scrollPositions}, function() {
+        chrome.storage.local.set({'scrollPositions': scrollPositions}, function() {
             console.log('scroll saved');
         });
-}
+    });
+}   
+
+    
 
 function sendScrollPosition(){
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
