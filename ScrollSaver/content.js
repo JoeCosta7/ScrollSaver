@@ -21,10 +21,14 @@ chrome.storage.local.get(['mySavedUrls', 'scrollPositions'], async function(resu
     window.navigation.addEventListener("navigate", () =>{
         console.log('location changed!');
         if (existingUrls.includes(location.href)){
-            document.getElementById("newAnchor").style.visibility = "hidden";
-        }
-        else{
-            document.getElementById("newAnchor").style.visibility = "visible";
+            const anchor = document.getElementById("newAnchor");
+            if (anchor) {
+                anchor.style.visibility = "hidden";
+            }
+        } else {
+            if (anchor) {
+                anchor.style.visibility = "visible";
+            }
         }
     });
 });

@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
               chrome.scripting.executeScript( {
                 target: { tabId: tabs[0].id },
                 func: sendScrollPosition,
-                world: "ISOLATED"
               })
               .then(requestScrollPosition);
             })
