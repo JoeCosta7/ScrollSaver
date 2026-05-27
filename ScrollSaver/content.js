@@ -14,11 +14,11 @@ chrome.storage.local.get(['mySavedUrls', 'scrollPositions'], async function(resu
         newElement.style.zIndex = "10000";
 
         document.body.appendChild(newElement);
-        if(result.scrollPositions){
-            window.addEventListener('load', () => {
-                window.scrollTo(result.scrollPositions[index][0], result.scrollPositions[index][1]);
-            });
-        }
+        // if(result.scrollPositions){
+        //     window.addEventListener('load', () => {
+        //         window.scrollTo(result.scrollPositions[index][0], result.scrollPositions[index][1]);
+        //     });
+        // }
     }
 
     window.navigation.addEventListener("navigate", () =>{
