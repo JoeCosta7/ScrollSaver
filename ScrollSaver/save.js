@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
-    chrome.storage.local.get(['mySavedUrls'], function(result) {
-        if (result.mySavedUrls && result.mySavedUrls.length > 0) {
-            displayUrls(result.mySavedUrls)
+    chrome.storage.local.get(['saves'], function(result) {
+        if (result.saves && result.saves.length > 0) {
+            displayUrls(result.saves)
         } else {
             document.getElementById("link").innerHTML = "No URL saved yet";
         }
@@ -12,53 +12,64 @@ document.addEventListener('DOMContentLoaded', function() {
         const url = await getCurrentTabUrl();
 
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-              chrome.scripting.executeScript( {
-                target: { tabId: tabs[0].id },
-                func: sendScrollPosition,
-              })
-              .then(requestScrollPosition);
+            chrome.scripting.executeScript( {
+            target: { tabId: tabs[0].id },
+            func: sendScrollPosition,
             })
-        
-        chrome.storage.local.get({'mySavedUrls': []}, function(result) {
-            const existingUrls = result.mySavedUrls || [];
-            existingUrls.push(url);
-            chrome.storage.local.set({'mySavedUrls': existingUrls}, function() {
-                console.log('URL saved!');
-                displayUrls(existingUrls);
-            });
-        });
+            .then(requestScrollPosition);
+        })
     });
 });
 
-function displayUrls(urls) {
+function displayUrls(entries) {
     const linkElement = document.getElementById("link");
     linkElement.innerHTML = "";
-    urls.forEach((url, index) => {
-        const itemDiv = document.createElement("div");
-        itemDiv.className = "flex items-center gap-2 p-2 bg-gray-50 rounded";
+    // TODO: put css in its own file
+    if(entries.length === 0){
+        document.getElementById("link").innerHTML = "No URL saved yet";
+        return;
+    }
+    entries.forEach((entry) => {
+        const urlContainer = document.createElement("div");
+        urlContainer.style.borderBottom = "1px solid #ccc";
+        urlContainer.style.paddingBottom = "10px";
+        urlContainer.style.marginBottom = "10px";
 
-        const urlText = document.createElement("p");
-        urlText.className = "flex-1 truncate text-gray-700";
-        urlText.textContent = url;
+        const urlTitle = document.createElement("strong");
+        urlTitle.textContent = entry.url;
+        urlContainer.appendChild(urlTitle);
 
-        const button = document.createElement("button");
-        button.className = "bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1 rounded shrink-0";
-        button.textContent = "Go";
-        button.addEventListener("click", async function () {
-            handleButtonClick(url, index)
+        entry.positions.forEach((pos, index) => {
+            const itemDiv = document.createElement("div");
+            itemDiv.style.display = 'flex';
+            itemDiv.style.alignItems = 'center';
+            itemDiv.style.gap = '10px';
+            itemDiv.style.marginLeft = '15px';
+            itemDiv.style.marginTop = '5px';
+
+            const posText = document.createElement("p");
+            posText.style.margin = "0";
+            posText.textContent = `Position ${index + 1}: (X: ${pos[0]}, Y: ${pos[1]})`;
+
+            const goButton = document.createElement("button");
+            goButton.textContent = "Go";
+            goButton.addEventListener("click", function () {
+                handleButtonClick(entry.url, pos);
+            });
+
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.addEventListener("click", function () {
+                handleDeleteClick(entry.url, pos);
+            });
+
+            itemDiv.appendChild(posText);
+            itemDiv.appendChild(goButton);
+            itemDiv.appendChild(deleteButton);
+            urlContainer.appendChild(itemDiv);
         });
 
-        const deleteButton = document.createElement("button");
-        deleteButton.className = "bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-3 py-1 rounded shrink-0";
-        deleteButton.textContent = "Delete";
-        deleteButton.addEventListener("click", async function () {
-            handleDeleteClick(url, index);
-        });
-
-        itemDiv.appendChild(urlText);
-        itemDiv.appendChild(button);
-        itemDiv.appendChild(deleteButton);
-        linkElement.appendChild(itemDiv);
+        linkElement.appendChild(urlContainer);
     });
 }
 
@@ -68,15 +79,25 @@ async function getCurrentTabUrl() {
     return tab.url;
 }
 
-async function requestScrollPosition() {
+async function requestScrollPosition() { //entries are saved here
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     const response = await chrome.tabs.sendMessage(tab.id, {message: "scrollXY"});
     
-    chrome.storage.local.get(['scrollPositions'], function(result) {
-        const scrollPositions = result.scrollPositions || [];
-        scrollPositions.push(response.scrollPos);
-        chrome.storage.local.set({'scrollPositions': scrollPositions}, function() {
+    chrome.storage.local.get(['saves'], async function(result) {
+        const saves = result.saves || [];
+        const url = await getCurrentTabUrl();
+        const existingEntry = saves.find(entry => entry.url === url);
+        if (existingEntry) { //if urls already saved to this page, add to list
+            existingEntry.positions.push(response.scrollPos);
+        } else {
+            saves.push({ //else, initialize the list
+                url: url,
+                positions: [response.scrollPos]
+            });
+        }
+        chrome.storage.local.set({'saves':saves}, function() {
             console.log('scroll saved');
+            displayUrls(saves);
         });
     });
 }   
@@ -93,8 +114,8 @@ function sendScrollPosition(){
         document.getElementById('newAnchor').style.top = window.scrollY + "px";
     } catch {
         const newElement = document.createElement("div");
-        newElement.setAttribute("id", "newAnchor");
-        newElement.textContent = "Anchor is here...";
+        newElement.setAttribute("id", `anchor-${window.scrollX}-${window.scrollY}`);
+        newElement.textContent = `Anchor ${window.scrollX}, ${window.scrollY}`;
         newElement.style.position = "absolute";
         newElement.style.left = "0px";
         newElement.style.top = window.scrollY + "px";

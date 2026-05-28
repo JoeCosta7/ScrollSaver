@@ -1,37 +1,47 @@
-function handleButtonClick(savedUrl, index) {
-  chrome.storage.local.get(['scrollPositions'], async function(result) {
-    const url = await getCurrentTabUrl();
+async function handleButtonClick(savedUrl, savedPosition) {
+  const url = await getCurrentTabUrl();
 
-    if(url!=savedUrl){
-      chrome.tabs.create({ url: savedUrl }, newTab => {
-        chrome.scripting.executeScript({
-          target: { tabId: newTab.id },
-          func: loadScrollPos,
-          args: [result.scrollPositions[index][0],result.scrollPositions[index][1]]
-        })
+  if(url!=savedUrl){
+    chrome.tabs.create({ url: savedUrl }, newTab => {
+      chrome.scripting.executeScript({
+        target: { tabId: newTab.id },
+        func: loadScrollPos,
+        args: [savedPosition[0],savedPosition[1]]
       })
-    }
-    else if (result.scrollPositions && result.scrollPositions[index]) {
-      executeScroll(result.scrollPositions[index][0],result.scrollPositions[index][1]); 
-    } else {
-      console.log("no url");
-    }
-  });
+    })
+  }
+  else {
+    executeScroll(savedPosition[0],savedPosition[1]); 
+  }
 };
 
-function handleDeleteClick(savedUrl, index) {
-        console.log(`Deleting URL: ${savedUrl} at index: ${index}`);
-        chrome.storage.local.get(['mySavedUrls', 'scrollPositions'], function(result) {
-        const urls = result.mySavedUrls || [];
-        const scrollPositions = result.scrollPositions || [];
+function handleDeleteClick(savedUrl, savedPosition) {
+        chrome.storage.local.get(['saves'], function(result) {
+        const entries = result.saves || [];
+        const urlEntryIndex = entries.findIndex(entry => entry.url === savedUrl);
+        const index = entries[urlEntryIndex].positions.findIndex(pos => 
+            pos[0] === savedPosition[0] && pos[1] === savedPosition[1]
+        );
 
-        urls.splice(index, 1);
-        scrollPositions.splice(index, 1);
+        entries[urlEntryIndex].positions.splice(index, 1);
+        if (entries[urlEntryIndex].positions.length === 0) {
+          entries.splice(urlEntryIndex, 1);
+        }
 
-        chrome.storage.local.set({ 'mySavedUrls': urls, 'scrollPositions': scrollPositions }, function() {
+        chrome.storage.local.set({ 'saves' : entries}, function() {
             console.log('URL and scroll position deleted');
-            displayUrls(urls);
+            displayUrls(entries);
         });
+
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            chrome.scripting.executeScript( {
+            target: { tabId: tabs[0].id },
+            func: (x, y) => {
+              document.getElementById(`anchor-${x}-${y}`).remove();
+            },
+            args: [savedPosition[0],savedPosition[1]]
+            });
+        })
     });
 }
 
