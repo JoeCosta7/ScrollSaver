@@ -24,41 +24,37 @@ document.addEventListener('DOMContentLoaded', function() {
 function displayUrls(entries) {
     const linkElement = document.getElementById("link");
     linkElement.innerHTML = "";
-    // TODO: put css in its own file
     if(entries.length === 0){
-        document.getElementById("link").innerHTML = "No URL saved yet";
+        linkElement.innerHTML = '<li class="text-gray-400 text-xs italic">No URL saved yet</li>';
         return;
     }
     entries.forEach((entry) => {
-        const urlContainer = document.createElement("div");
-        urlContainer.style.borderBottom = "1px solid #ccc";
-        urlContainer.style.paddingBottom = "10px";
-        urlContainer.style.marginBottom = "10px";
+        const urlContainer = document.createElement("li");
+        urlContainer.className = "bg-gray-50 border border-gray-200 rounded-lg p-3";
 
-        const urlTitle = document.createElement("strong");
+        const urlTitle = document.createElement("p");
+        urlTitle.className = "font-semibold text-xs text-gray-700 truncate mb-2";
         urlTitle.textContent = entry.url;
         urlContainer.appendChild(urlTitle);
 
         entry.positions.forEach((pos, index) => {
             const itemDiv = document.createElement("div");
-            itemDiv.style.display = 'flex';
-            itemDiv.style.alignItems = 'center';
-            itemDiv.style.gap = '10px';
-            itemDiv.style.marginLeft = '15px';
-            itemDiv.style.marginTop = '5px';
+            itemDiv.className = "flex items-center gap-2 mt-1 ml-1";
 
-            const posText = document.createElement("p");
-            posText.style.margin = "0";
+            const posText = document.createElement("span");
+            posText.className = "text-xs text-gray-500 flex-1";
             posText.textContent = `Position ${index + 1}: (X: ${pos[0]}, Y: ${pos[1]})`;
 
             const goButton = document.createElement("button");
             goButton.textContent = "Go";
+            goButton.className = "bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-2 py-1 rounded";
             goButton.addEventListener("click", function () {
                 handleButtonClick(entry.url, pos);
             });
 
             const deleteButton = document.createElement("button");
             deleteButton.textContent = "Delete";
+            deleteButton.className = "bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-2 py-1 rounded";
             deleteButton.addEventListener("click", function () {
                 handleDeleteClick(entry.url, pos);
             });
