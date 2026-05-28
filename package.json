@@ -1,0 +1,24 @@
+{
+  "name": "scrollsaver",
+  "version": "1.0.0",
+  "description": "idk",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ScrollSaver/input.css -o ScrollSaver/output.css",
+    "watch:css": "tailwindcss -i ScrollSaver/input.css -o ScrollSaver/output.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JoeCosta7/ChromeExtension.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JoeCosta7/ChromeExtension/issues"
+  },
+  "homepage": "https://github.com/JoeCosta7/ChromeExtension#readme",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "tailwindcss": "^4.3.0"
+  }
+}

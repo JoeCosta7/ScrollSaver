@@ -33,24 +33,23 @@ document.addEventListener('DOMContentLoaded', function() {
 function displayUrls(urls) {
     const linkElement = document.getElementById("link");
     linkElement.innerHTML = "";
-    //TODO: put css in own file
     urls.forEach((url, index) => {
         const itemDiv = document.createElement("div");
-        itemDiv.style.marginBottom = "10px";
-        itemDiv.style.display = 'flex';
-        itemDiv.style.alignItems = 'center';
-        itemDiv.style.gap = '10px';
+        itemDiv.className = "flex items-center gap-2 p-2 bg-gray-50 rounded";
 
         const urlText = document.createElement("p");
+        urlText.className = "flex-1 truncate text-gray-700";
         urlText.textContent = url;
 
         const button = document.createElement("button");
+        button.className = "bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1 rounded shrink-0";
         button.textContent = "Go";
         button.addEventListener("click", async function () {
             handleButtonClick(url, index)
         });
 
         const deleteButton = document.createElement("button");
+        deleteButton.className = "bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-3 py-1 rounded shrink-0";
         deleteButton.textContent = "Delete";
         deleteButton.addEventListener("click", async function () {
             handleDeleteClick(url, index);
