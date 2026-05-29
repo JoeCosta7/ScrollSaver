@@ -89,6 +89,8 @@ async function requestScrollPosition() { //entries are saved here
         const saves = result.saves || [];
         const url = await getCurrentTabUrl();
         const existingEntry = saves.find(entry => entry.url === url);
+        const data = response.scrollPos;
+        data.push(`Position ${saves.length + 1}: (X: ${response.scrollPos[0]}, Y: ${response.scrollPos[1]})`)
         if (existingEntry) { //if urls already saved to this page, add to list
             existingEntry.positions.push(response.scrollPos);
         } else {
@@ -117,7 +119,8 @@ function sendScrollPosition(){
     } catch {
         const newElement = document.createElement("div");
         newElement.setAttribute("id", `anchor-${window.scrollX}-${window.scrollY}`);
-        newElement.textContent = `Anchor ${window.scrollX}, ${window.scrollY}`;
+        const index = document.querySelectorAll(".saved-anchor-marker").length;
+        newElement.textContent = `Position ${index + 1}: (X: ${window.scrollX}, Y: ${window.scrollY})`;
         newElement.style.position = "absolute";
         newElement.style.left = "0px";
         newElement.style.top = window.scrollY + "px";
