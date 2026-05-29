@@ -90,13 +90,14 @@ async function requestScrollPosition() { //entries are saved here
         const url = await getCurrentTabUrl();
         const existingEntry = saves.find(entry => entry.url === url);
         const data = response.scrollPos;
-        data.push(`Position ${saves.length + 1}: (X: ${response.scrollPos[0]}, Y: ${response.scrollPos[1]})`)
         if (existingEntry) { //if urls already saved to this page, add to list
-            existingEntry.positions.push(response.scrollPos);
+            data.push(`Position ${existingEntry.positions.length + 1}: (X: ${response.scrollPos[0]}, Y: ${response.scrollPos[1]})`)
+            existingEntry.positions.push(data);
         } else {
+            data.push(`Position 1: (X: ${response.scrollPos[0]}, Y: ${response.scrollPos[1]})`)
             saves.push({ //else, initialize the list
                 url: url,
-                positions: [response.scrollPos]
+                positions: [data]
             });
         }
         chrome.storage.local.set({'saves':saves}, function() {
@@ -121,6 +122,7 @@ function sendScrollPosition(){
         newElement.setAttribute("id", `anchor-${window.scrollX}-${window.scrollY}`);
         const index = document.querySelectorAll(".saved-anchor-marker").length;
         newElement.textContent = `Position ${index + 1}: (X: ${window.scrollX}, Y: ${window.scrollY})`;
+        newElement.classList.add("saved-anchor-marker");
         newElement.style.position = "absolute";
         newElement.style.left = "0px";
         newElement.style.top = window.scrollY + "px";
