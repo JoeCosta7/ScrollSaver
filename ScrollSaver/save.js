@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (result.saves && result.saves.length > 0) {
             displayUrls(result.saves)
         } else {
-            document.getElementById("link").innerHTML = "No URL saved yet";
+            document.getElementById("link").innerHTML = '<li class="text-gray-400 text-xs italic">No bookmarks saved for this page</li>';
         }
     });
     const button = document.getElementById("savePage");
@@ -19,54 +19,57 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(requestScrollPosition);
         })
     });
+    document.getElementById("bookmarks").addEventListener("click", () => {
+        chrome.tabs.create({ url: chrome.runtime.getURL("bookmarks.html") });
+    });
 });
 
-function displayUrls(entries) {
+async function displayUrls(entries) {
     const linkElement = document.getElementById("link");
     linkElement.innerHTML = "";
-    if(entries.length === 0){
-        linkElement.innerHTML = '<li class="text-gray-400 text-xs italic">No URL saved yet</li>';
+    const url = await getCurrentTabUrl();
+    const entry = entries.find(e => e.url === url)
+    if(!entry){
+        linkElement.innerHTML = '<li class="text-gray-400 text-xs italic">No bookmarks saved for this page</li>';
         return;
     }
-    entries.forEach((entry) => {
-        const urlContainer = document.createElement("li");
-        urlContainer.className = "bg-gray-50 border border-gray-200 rounded-lg p-3";
+    const urlContainer = document.createElement("li");
+    urlContainer.className = "bg-gray-50 border border-gray-200 rounded-lg p-3";
 
-        const urlTitle = document.createElement("p");
-        urlTitle.className = "font-semibold text-xs text-gray-700 truncate mb-2";
-        urlTitle.textContent = entry.url;
-        urlContainer.appendChild(urlTitle);
+    const urlTitle = document.createElement("p");
+    urlTitle.className = "font-semibold text-xs text-gray-700 truncate mb-2";
+    urlTitle.textContent = entry.url;
+    urlContainer.appendChild(urlTitle);
 
-        entry.positions.forEach((pos, index) => {
-            const itemDiv = document.createElement("div");
-            itemDiv.className = "flex items-center gap-2 mt-1 ml-1";
+    entry.positions.forEach((pos, index) => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "flex items-center gap-2 mt-1 ml-1";
 
-            const posText = document.createElement("span");
-            posText.className = "text-xs text-gray-500 flex-1";
-            posText.textContent = `Position ${index + 1}: (X: ${pos[0]}, Y: ${pos[1]})`;
+        const posText = document.createElement("span");
+        posText.className = "text-xs text-gray-500 flex-1";
+        posText.textContent = `Position ${index + 1}: (X: ${pos[0]}, Y: ${pos[1]})`;
 
-            const goButton = document.createElement("button");
-            goButton.textContent = "Go";
-            goButton.className = "bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-2 py-1 rounded";
-            goButton.addEventListener("click", function () {
-                handleButtonClick(entry.url, pos);
-            });
-
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "Delete";
-            deleteButton.className = "bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-2 py-1 rounded";
-            deleteButton.addEventListener("click", function () {
-                handleDeleteClick(entry.url, pos);
-            });
-
-            itemDiv.appendChild(posText);
-            itemDiv.appendChild(goButton);
-            itemDiv.appendChild(deleteButton);
-            urlContainer.appendChild(itemDiv);
+        const goButton = document.createElement("button");
+        goButton.textContent = "Go";
+        goButton.className = "bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-2 py-1 rounded";
+        goButton.addEventListener("click", function () {
+            handleButtonClick(entry.url, pos);
         });
 
-        linkElement.appendChild(urlContainer);
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Delete";
+        deleteButton.className = "bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-2 py-1 rounded";
+        deleteButton.addEventListener("click", function () {
+            handleDeleteClick(entry.url, pos);
+        });
+
+        itemDiv.appendChild(posText);
+        itemDiv.appendChild(goButton);
+        itemDiv.appendChild(deleteButton);
+        urlContainer.appendChild(itemDiv);
     });
+
+    linkElement.appendChild(urlContainer);
 }
 
 async function getCurrentTabUrl() {
