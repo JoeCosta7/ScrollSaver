@@ -4,9 +4,6 @@
   "description": "Does Something",
   "permissions": ["storage", "tabs", "scripting", "activeTab"],
   "host_permissions": ["*://*/*", "file://*/*"],
-  "background": {
-    "service_worker": "pdfchecker.js"
-  },
   "web_accessible_resources": [
     {
       "resources": ["pdfjs/*"],
