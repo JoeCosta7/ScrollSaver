@@ -12,11 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const url = await getCurrentTabUrl();
 
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            chrome.scripting.executeScript( {
-            target: { tabId: tabs[0].id },
-            func: sendScrollPosition,
-            })
-            .then(requestScrollPosition);
+            chrome.scripting.insertCSS({ target: { tabId: tabs[0].id }, files: ["output.css"] })
+                .then(() => chrome.scripting.executeScript({ target: { tabId: tabs[0].id }, func: sendScrollPosition }))
+                .then(requestScrollPosition);
         })
     });
     document.getElementById("bookmarks").addEventListener("click", () => {
@@ -118,12 +116,8 @@ function sendScrollPosition(){
         const newElement = document.createElement("div");
         newElement.setAttribute("id", `anchor-${window.scrollX}-${window.scrollY}`);
         newElement.textContent = `Anchor ${window.scrollX}, ${window.scrollY}`;
-        newElement.style.position = "absolute";
-        newElement.style.left = "0px";
-        newElement.style.top = window.scrollY + "px";
-        newElement.style.backgroundColor = "red";
-        newElement.style.padding = "10px";
-        newElement.style.zIndex = "10000";
+        newElement.className = "bg-red-500 text-white text-base font-semibold px-4 py-2 rounded-full shadow-md tracking-wide select-none";
+        newElement.style.cssText = `position:absolute;left:0;top:${window.scrollY}px;z-index:10000`;
 
         document.body.appendChild(newElement);
     }
