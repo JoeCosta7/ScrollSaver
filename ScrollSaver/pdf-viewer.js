@@ -4,6 +4,14 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('pdfjs/pdf.worker
 
 const params = new URLSearchParams(window.location.search);
 const pdfUrl = params.get('url');
+let scrollTarget = null;
+
+if (params.has('scrollX') && params.has('scrollY')) {
+    scrollTarget = {
+        x: parseInt(params.get('scrollX')),
+        y: parseInt(params.get('scrollY'))
+    };
+}
 
 document.title = decodeURIComponent(pdfUrl.split('/').pop() || 'PDF Document');
 document.getElementById('pdf-title').textContent = document.title;
@@ -60,7 +68,9 @@ async function loadPdf() {
     }
         updatePage();
         renderBookmarkMarkers();
-
+        if (scrollTarget) {
+            window.scrollTo({ left: scrollTarget.x, top: scrollTarget.y, behavior: 'smooth' });
+        }
 }
 function updatePage() {
       const canvases = document.querySelectorAll('.pdf-page');

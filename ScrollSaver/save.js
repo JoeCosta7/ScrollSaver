@@ -135,8 +135,7 @@ function sendScrollPosition(){
         newElement.setAttribute("id", `anchor-${window.scrollX}-${window.scrollY}`);
         const index = document.querySelectorAll(".saved-anchor-marker").length;
         newElement.textContent = `Position ${index + 1}: (X: ${window.scrollX}, Y: ${window.scrollY})`;
-        newElement.classList.add("saved-anchor-marker");
-        newElement.className = "bg-red-500 text-white text-base font-semibold px-4 py-2 rounded-full shadow-md tracking-wide select-none";
+        newElement.className = "saved-anchor-marker bg-red-500 text-white text-base font-semibold px-4 py-2 rounded-full shadow-md tracking-wide select-none";
         newElement.style.cssText = `position:absolute;left:0;top:${window.scrollY}px;z-index:10000`;
 
         document.body.appendChild(newElement);

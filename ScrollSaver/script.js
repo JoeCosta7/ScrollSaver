@@ -3,9 +3,11 @@ async function handleButtonClick(savedUrl, savedPosition) {
 
   if(url!=savedUrl){
     const isPdf = /\.pdf($|\?)/i.test(savedUrl);
-    const targetUrl = isPdf
-      ? chrome.runtime.getURL('pdf-viewer.html') + '?url=' + encodeURIComponent(savedUrl)
-      : savedUrl;
+    let targetUrl = savedUrl;
+    if (isPdf) {
+      targetUrl = chrome.runtime.getURL('pdf-viewer.html') + '?url=' + encodeURIComponent(savedUrl)
+        + '&scrollX=' + savedPosition[0] + '&scrollY=' + savedPosition[1];
+    }
     chrome.tabs.create({ url: targetUrl }, newTab => {
       if (!isPdf) {
         chrome.scripting.executeScript({
