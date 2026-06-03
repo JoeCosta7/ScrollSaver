@@ -27,9 +27,11 @@ function handleDeleteClick(savedUrl, savedPosition) {
         chrome.storage.local.get(['saves'], function(result) {
         const entries = result.saves || [];
         const urlEntryIndex = entries.findIndex(entry => entry.url === savedUrl);
+        if (urlEntryIndex === -1) return;
         const index = entries[urlEntryIndex].positions.findIndex(pos =>
             pos[0] === savedPosition[0] && pos[1] === savedPosition[1]
         );
+        if (index === -1) return;
 
         entries[urlEntryIndex].positions.splice(index, 1);
         if (entries[urlEntryIndex].positions.length === 0) {

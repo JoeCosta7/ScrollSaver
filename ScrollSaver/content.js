@@ -1,5 +1,8 @@
 
-if (/\.pdf($|\?)/i.test(location.href)) return;
+const link = document.createElement("link");
+link.rel = "stylesheet";
+link.href = chrome.runtime.getURL("output.css");
+document.head.appendChild(link);
 
 chrome.storage.local.get(['saves'], async function(result) {
     const existingUrls = result.saves || [];
@@ -8,14 +11,12 @@ chrome.storage.local.get(['saves'], async function(result) {
         entry.positions.forEach((pos) => {
             const index = existingUrls.indexOf(location.href);
             const newElement = document.createElement("div");
-            newElement.classList.add("saved-anchor-marker");
+            newElement.className = "saved-anchor-marker bg-red-500 text-white text-large font-semibold px-4 py-2 rounded-full shadow-md tracking-wide select-none";
             newElement.setAttribute("id", `anchor-${pos[0]}-${pos[1]}`);
             newElement.textContent = pos[2];
             newElement.style.position = "absolute";
             newElement.style.left = "0px";
             newElement.style.top = pos[1] + "px";
-            newElement.style.backgroundColor = "red";
-            newElement.style.padding = "10px";
             newElement.style.zIndex = "10000";
 
             document.body.appendChild(newElement);
@@ -36,4 +37,3 @@ chrome.storage.local.get(['saves'], async function(result) {
         });
     });
 });
-

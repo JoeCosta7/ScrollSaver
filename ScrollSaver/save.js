@@ -96,8 +96,14 @@ async function getCurrentTabUrl() {
 
 async function requestScrollPosition() { //entries are saved here
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    const response = await chrome.tabs.sendMessage(tab.id, {message: "scrollXY"});
-    
+    let response;
+    try {
+        response = await chrome.tabs.sendMessage(tab.id, {message: "scrollXY"});
+    } catch (e) {
+        console.error('Failed to get scroll position:', e);
+        return;
+    }
+
     chrome.storage.local.get(['saves'], async function(result) {
         const saves = result.saves || [];
         const url = await getCurrentTabUrl();
@@ -123,11 +129,14 @@ async function requestScrollPosition() { //entries are saved here
     
 
 function sendScrollPosition(){
-    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-        if (request.message == "scrollXY") {
-            sendResponse({ scrollPos: [window.scrollX,window.scrollY] });
-        }
-    });
+    if (!window.__scrollSaverListenerAdded) {
+        window.__scrollSaverListenerAdded = true;
+        chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+            if (request.message == "scrollXY") {
+                sendResponse({ scrollPos: [window.scrollX, window.scrollY] });
+            }
+        });
+    }
     try{
         document.getElementById('newAnchor').style.top = window.scrollY + "px";
     } catch {
@@ -135,8 +144,11 @@ function sendScrollPosition(){
         newElement.setAttribute("id", `anchor-${window.scrollX}-${window.scrollY}`);
         const index = document.querySelectorAll(".saved-anchor-marker").length;
         newElement.textContent = `Position ${index + 1}: (X: ${window.scrollX}, Y: ${window.scrollY})`;
-        newElement.className = "saved-anchor-marker bg-red-500 text-white text-base font-semibold px-4 py-2 rounded-full shadow-md tracking-wide select-none";
-        newElement.style.cssText = `position:absolute;left:0;top:${window.scrollY}px;z-index:10000`;
+        newElement.className = "saved-anchor-marker bg-red-500 text-white text-large font-semibold px-4 py-2 rounded-full shadow-md tracking-wide select-none";
+        newElement.style.position = "absolute";
+        newElement.style.left = "0px";
+        newElement.style.top = window.scrollY + "px";
+        newElement.style.zIndex = "10000";
 
         document.body.appendChild(newElement);
     }
