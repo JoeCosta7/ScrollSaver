@@ -4,7 +4,7 @@ link.rel = "stylesheet";
 link.href = chrome.runtime.getURL("output.css");
 document.head.appendChild(link);
 
-chrome.storage.local.get(['saves'], async function(result) {
+chrome.storage.local.get(['saves', 'settings'], async function(result) {
     const existingUrls = result.saves || [];
     const entry = existingUrls.find(ent => ent.url === location.href)
     if (entry) {

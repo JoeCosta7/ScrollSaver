@@ -31,7 +31,33 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById("bookmarks").addEventListener("click", () => {
         chrome.tabs.create({ url: chrome.runtime.getURL("bookmarks.html") });
     });
-});
+    document.getElementById('settingsBtn').addEventListener('click', () => {
+        document.getElementById('main-view').style.display = 'none';
+        document.getElementById('settings-view').style.display = 'block';
+    });
+    document.getElementById('backBtn').addEventListener('click', () => {
+    document.getElementById('settings-view').style.display = 'none';
+    document.getElementById('main-view').style.display = 'block';
+    });
+    chrome.storage.local.get(['settings'], (result) => {
+    document.getElementById('anchorToggle').checked = result.settings?.anchorsVisible !== false;
+
+    document.getElementById('anchorToggle').addEventListener('change', async (e) => {
+       const visible = e.target.checked;
+       chrome.storage.local.set({settings: {anchorsVisible: visible}}) 
+       const [tab] = await chrome.tabs.query({active : true})
+       if (tab.url.includes('pdf-viewer.html')) return;
+       chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: (v) => {
+            document.querySelectorAll('.saved-anchor-marker').forEach(el => {
+                el.style.visibility = v ? 'visible' : 'hidden';
+            });
+        },
+        args: [visible]
+       })
+    });
+
 
 async function displayUrls(entries) {
     const linkElement = document.getElementById("link");
@@ -153,3 +179,5 @@ function sendScrollPosition(){
         document.body.appendChild(newElement);
     }
 }
+    });
+});

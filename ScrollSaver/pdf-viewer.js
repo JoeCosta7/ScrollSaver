@@ -26,7 +26,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 function renderBookmarkMarkers() {
     document.querySelectorAll('.saved-anchor-marker').forEach(el => el.remove());
-    chrome.storage.local.get(['saves'], (result) => {
+    chrome.storage.local.get(['saves', 'settings'], (result) => {
+        const anchorsVisible = result.settings?.anchorsVisible !== false;
         const entry = (result.saves || []).find(s => s.url === pdfUrl);
         if (!entry) return;
         const container = document.getElementById('pdf-container');
@@ -41,6 +42,7 @@ function renderBookmarkMarkers() {
             marker.style.left = "0px";
             marker.style.top = pos[1] + "px";
             marker.style.zIndex = "10000";
+            marker.style.visibility = anchorsVisible ? 'visible' : 'hidden';
             container.appendChild(marker);
         });
     });
