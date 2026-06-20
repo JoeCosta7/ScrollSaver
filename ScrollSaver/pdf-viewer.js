@@ -72,26 +72,26 @@ async function loadPdf() {
 
         await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
     }
-        updatePage();
-        renderBookmarkMarkers();
-        if (scrollTarget) {
-            window.scrollTo({ left: scrollTarget.x, top: scrollTarget.y, behavior: 'smooth' });
-        }
+    updatePage();
+    renderBookmarkMarkers();
+    if (scrollTarget) {
+        window.scrollTo({ left: scrollTarget.x, top: scrollTarget.y, behavior: 'smooth' });
+    }
 }
+
 function updatePage() {
-      const canvases = document.querySelectorAll('.pdf-page');
-  const scrollMid = window.scrollY + window.innerHeight / 2;
-  for (const canvas of canvases) {
+    const canvases = document.querySelectorAll('.pdf-page');
+    const scrollMid = window.scrollY + window.innerHeight / 2;
+    for (const canvas of canvases) {
     const top = canvas.offsetTop;
     const bottom = top + canvas.height;
     if (scrollMid >= top && scrollMid < bottom) {
-      document.getElementById('page-indicator').textContent =
-        `Page ${canvas.dataset.pageNum}`;
-      break;
+        document.getElementById('page-indicator').textContent =
+            `Page ${canvas.dataset.pageNum}`;
+        break;
     }
   }
 }
 
 window.addEventListener('scroll', updatePage, { passive: true });
 loadPdf();
-

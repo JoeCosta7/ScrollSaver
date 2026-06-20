@@ -4,6 +4,7 @@ chrome.storage.local.get(['saves', 'settings'], async function(result) {
     const entry = existingUrls.find(ent => ent.url === location.href)
     if (entry) {
         entry.positions.forEach((pos) => {
+            const anchorsVisible = result.settings?.anchorsVisible !== false;
             const newElement = document.createElement("div");
             newElement.className = "saved-anchor-marker";
             newElement.setAttribute("id", `anchor-${pos[0]}-${pos[1]}`);
@@ -15,11 +16,11 @@ chrome.storage.local.get(['saves', 'settings'], async function(result) {
                 box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
                 letter-spacing: .025em; user-select: none; font-family: sans-serif;
             `;
+            newElement.style.visibility = anchorsVisible ? 'visible' : 'hidden';
 
             document.body.appendChild(newElement);
         });
     }
-
     window.navigation.addEventListener("navigate", () =>{
         console.log('location changed!');
         const anchors = document.querySelectorAll(".saved-anchor-marker");
@@ -33,4 +34,17 @@ chrome.storage.local.get(['saves', 'settings'], async function(result) {
             }
         });
     });
+
+    
+});
+
+document.addEventListener("visibilitychange", () => { //update visibility when tab switches in case settings were updated on other tab
+    if (document.visibilityState === 'visible' && chrome.runtime?.id) {
+        chrome.storage.local.get(['settings'], function(result) {
+            const anchorsVisible = result.settings?.anchorsVisible !== false;
+            document.querySelectorAll('.saved-anchor-marker').forEach(el => {
+                el.style.visibility = anchorsVisible ? 'visible' : 'hidden';
+            });
+        });
+    }
 });

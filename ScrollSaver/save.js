@@ -92,7 +92,17 @@ async function requestScrollPosition() {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
+    chrome.runtime.connect({ name: "popup-channel" }); //to help detect when popup closes
+
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    chrome.scripting.executeScript({ //anchors always made visible when popup is opened
+        target: { tabId: tab.id },
+        func: (v) => {
+            document.querySelectorAll('.saved-anchor-marker').forEach(el => {
+                el.style.visibility = 'visible';
+            });
+        },
+    });
     if (tab.url && /\.pdf($|\?)/i.test(tab.url) && !tab.url.startsWith(chrome.runtime.getURL(''))) {
         const openInViewer = document.getElementById('openInViewer');
         if (openInViewer) openInViewer.style.display = 'block';
@@ -193,17 +203,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         anchorToggle.addEventListener('change', async (e) => {
            const visible = e.target.checked;
            chrome.storage.local.set({settings: {anchorsVisible: visible}});
-           const [tab] = await chrome.tabs.query({active : true});
-           if (tab.url.includes('pdf-viewer.html')) return;
-           chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                func: (v) => {
-                    document.querySelectorAll('.saved-anchor-marker').forEach(el => {
-                        el.style.visibility = v ? 'visible' : 'hidden';
-                    });
-                },
-                args: [visible]
-           });
+        //    const [tab] = await chrome.tabs.query({active : true});
+        //    if (tab.url.includes('pdf-viewer.html')) return;
+        //    chrome.scripting.executeScript({
+        //         target: { tabId: tab.id },
+        //         func: (v) => {
+        //             document.querySelectorAll('.saved-anchor-marker').forEach(el => {
+        //                 el.style.visibility = v ? 'visible' : 'hidden';
+        //             });
+        //         },
+        //         args: [visible]
+        //    });
         });
     });
 });
