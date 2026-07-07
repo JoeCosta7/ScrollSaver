@@ -51,31 +51,43 @@ function renderBookmarkMarkers() {
 chrome.storage.onChanged.addListener(renderBookmarkMarkers);
 
 async function loadPdf() {
-    const loadingTask = pdfjsLib.getDocument({
-        url : pdfUrl,
-        cMapUrl: chrome.runtime.getURL('pdfjs/cmaps/'),
-        cMapPacked: true
-    });
+    try {
+        const loadingTask = pdfjsLib.getDocument({
+            url : pdfUrl,
+            cMapUrl: chrome.runtime.getURL('pdfjs/cmaps/'),
+            cMapPacked: true,
+            wasmUrl: chrome.runtime.getURL('pdfjs/wasm/')
+        });
 
-    const pdf = await loadingTask.promise;
-    const container = document.getElementById('pdf-container');
-    const scale = 1.5;
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-        const page = await pdf.getPage(pageNum);
-        const viewport = page.getViewport({ scale });
-        const canvas = document.createElement('canvas');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        canvas.dataset.pageNum = pageNum;
-        canvas.classList.add('pdf-page');
-        container.appendChild(canvas);
+        const pdf = await loadingTask.promise;
+        const container = document.getElementById('pdf-container');
+        const scale = 1.5;
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
+            const viewport = page.getViewport({ scale });
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            canvas.dataset.pageNum = pageNum;
+            canvas.classList.add('pdf-page');
+            container.appendChild(canvas);
 
-        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-    }
-    updatePage();
-    renderBookmarkMarkers();
-    if (scrollTarget) {
-        window.scrollTo({ left: scrollTarget.x, top: scrollTarget.y, behavior: 'smooth' });
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+        }
+        updatePage();
+        renderBookmarkMarkers();
+        if (scrollTarget) {
+            window.scrollTo({ left: scrollTarget.x, top: scrollTarget.y, behavior: 'smooth' });
+        }
+    } catch (err) {
+        console.error('ScrollSaver PDF load failed:', err);
+        const container = document.getElementById('pdf-container');
+        if (container) {
+            const box = document.createElement('div');
+            box.style.cssText = 'color:#fecaca; background:rgba(127,29,29,.4); border:1px solid #ef4444; border-radius:.5rem; padding:1rem; margin:1rem; max-width:42rem; font-size:.875rem; white-space:pre-wrap; overflow-wrap:break-word; font-family:sans-serif;';
+            box.textContent = `Failed to load PDF:\n${err && err.message ? err.message : err}`;
+            container.appendChild(box);
+        }
     }
 }
 
