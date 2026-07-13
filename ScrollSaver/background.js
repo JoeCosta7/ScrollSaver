@@ -112,15 +112,20 @@ chrome.runtime.onConnect.addListener((port) => { //update visibility when popup 
             chrome.storage.local.get(['settings'], async function(result) {
                 const anchorsVisible = result.settings?.anchorsVisible !== false;
                 const [tab] = await chrome.tabs.query({active : true});
-                chrome.scripting.executeScript({
-                    target: { tabId: tab.id },
-                    func: (v) => {
-                        document.querySelectorAll('.saved-anchor-marker').forEach(el => {
-                            el.style.visibility = v ? 'visible' : 'hidden';
-                        });
-                    },
-                    args: [anchorsVisible]
-                });
+                if (!tab) return;
+                if (tab.url && tab.url.includes('pdf-viewer.html')) { 
+                    chrome.tabs.sendMessage(tab.id, { message: 'setAnchorsVisible', visible: anchorsVisible }).catch(() => {});
+                } else {
+                    chrome.scripting.executeScript({
+                        target: { tabId: tab.id },
+                        func: (v) => {
+                            document.querySelectorAll('.saved-anchor-marker').forEach(el => {
+                                el.style.visibility = v ? 'visible' : 'hidden';
+                            });
+                        },
+                        args: [anchorsVisible]
+                    });
+                }
             });
             
         });

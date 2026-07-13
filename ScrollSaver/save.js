@@ -95,14 +95,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     chrome.runtime.connect({ name: "popup-channel" }); //to help detect when popup closes
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    chrome.scripting.executeScript({ //anchors always made visible when popup is opened
-        target: { tabId: tab.id },
-        func: (v) => {
-            document.querySelectorAll('.saved-anchor-marker').forEach(el => {
-                el.style.visibility = 'visible';
-            });
-        },
-    });
+    //anchors always made visible when popup is opened
+    //tell pdf viewer to make the anchors visible across all pdfs
+    if (tab.url && tab.url.includes('pdf-viewer.html')) {
+        chrome.tabs.sendMessage(tab.id, { message: 'setAnchorsVisible', visible: true }).catch(() => {});
+    } else {
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => {
+                document.querySelectorAll('.saved-anchor-marker').forEach(el => {
+                    el.style.visibility = 'visible';
+                });
+            },
+        });
+    }
     if (tab.url && /\.pdf($|\?)/i.test(tab.url) && !tab.url.startsWith(chrome.runtime.getURL(''))) {
         const openInViewer = document.getElementById('openInViewer');
         if (openInViewer) openInViewer.style.display = 'block';

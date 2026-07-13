@@ -21,6 +21,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ scrollPos: [window.scrollX, window.scrollY] });
     } else if (request.message === "scrollTo") {
         window.scrollTo({ left: request.x, top: request.y, behavior: 'smooth' });
+    } else if (request.message === "setAnchorsVisible") {
+        document.querySelectorAll('.saved-anchor-marker').forEach(el => {
+            el.style.visibility = request.visible ? 'visible' : 'hidden';
+        });
     }
 });
 
